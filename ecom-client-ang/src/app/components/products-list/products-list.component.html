@@ -1,0 +1,44 @@
+<h2>Products</h2>
+
+<div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+<div *ngIf="isLoading" class="text-center my-4">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+<form class="row g-2 mb-4" (ngSubmit)="onAddProduct()">
+  <div class="col-auto">
+    <input class="form-control" placeholder="Name" [(ngModel)]="newProduct.name" name="name" required>
+  </div>
+  <div class="col-auto">
+    <input class="form-control" type="number" placeholder="Price" [(ngModel)]="newProduct.price" name="price" required>
+  </div>
+  <div class="col-auto">
+    <input class="form-control" type="number" placeholder="Quantity" [(ngModel)]="newProduct.quantity" name="quantity" required>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary" type="submit">Add Product</button>
+  </div>
+</form>
+
+<table class="table table-striped" *ngIf="!isLoading">  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Price</th>
+    <th>Quantity</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let product of products">
+    <td>{{ product.id }}</td>
+    <td>{{ product.name }}</td>
+    <td>{{ product.price }}</td>
+    <td>{{ product.quantity }}</td>
+    <td>
+      <button class="btn btn-sm btn-danger" (click)="onDeleteProduct(product.id)">Delete</button>
+    </td>
+  </tr>
+  </tbody>
+</table>

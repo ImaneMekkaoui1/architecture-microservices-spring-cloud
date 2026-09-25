@@ -1,0 +1,41 @@
+<h2>Customers</h2>
+
+<div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+<div *ngIf="isLoading" class="text-center my-4">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<form class="row g-2 mb-4" (ngSubmit)="onAddCustomer()">
+  <div class="col-auto">
+    <input class="form-control" placeholder="Name" [(ngModel)]="newCustomer.name" name="name" required>
+  </div>
+  <div class="col-auto">
+    <input class="form-control" placeholder="Email" [(ngModel)]="newCustomer.email" name="email" required>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary" type="submit">Add Customer</button>
+  </div>
+</form>
+
+<table class="table table-striped" *ngIf="!isLoading">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Email</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let customer of customers">
+    <td>{{ customer.id }}</td>
+    <td>{{ customer.name }}</td>
+    <td>{{ customer.email }}</td>
+    <td>
+      <button class="btn btn-sm btn-danger" (click)="onDeleteCustomer(customer.id)">Delete</button>
+    </td>
+  </tr>
+  </tbody>
+</table>

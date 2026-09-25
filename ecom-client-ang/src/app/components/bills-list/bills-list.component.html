@@ -1,0 +1,66 @@
+<h2>Bills</h2>
+
+<div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+<h4>New Bill</h4>
+<form class="mb-4 border rounded p-3" (ngSubmit)="onCreateBill()">
+  <div class="mb-3">
+    <label class="form-label">Customer</label>
+    <select class="form-select" [(ngModel)]="selectedCustomerId" name="customerId" required>
+      <option [ngValue]="undefined" disabled>Select a customer</option>
+      <option *ngFor="let customer of customers" [ngValue]="customer.id">
+        {{ customer.name }} ({{ customer.email }})
+      </option>
+    </select>
+  </div>
+
+  <label class="form-label">Products</label>
+  <div class="row g-2 mb-2 align-items-center" *ngFor="let item of items; let i = index">
+    <div class="col-6">
+      <select class="form-select" [(ngModel)]="item.productId" [name]="'product' + i" required>
+        <option [ngValue]="0" disabled>Select a product</option>
+        <option *ngFor="let product of products" [ngValue]="product.id">
+          {{ product.name }} ({{ product.price }})
+        </option>
+      </select>
+    </div>
+    <div class="col-3">
+      <input class="form-control" type="number" min="1" [(ngModel)]="item.quantity" [name]="'quantity' + i">
+    </div>
+    <div class="col-3">
+      <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeItemRow(i)" [disabled]="items.length === 1">Remove</button>
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-sm btn-outline-secondary mb-3" (click)="addItemRow()">+ Add Product</button>
+  <div>
+    <button type="submit" class="btn btn-primary">Create Bill</button>
+  </div>
+</form>
+
+<hr>
+<div *ngIf="isLoading" class="text-center my-4">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<table class="table table-striped" *ngIf="!isLoading">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Billing Date</th>
+    <th>Customer ID</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let bill of bills">
+    <td>{{ bill.id }}</td>
+    <td>{{ bill.billingDate | date:'short' }}</td>
+    <td>{{ bill.customerId }}</td>
+    <td>
+      <a [routerLink]="['/bills', bill.id]" class="btn btn-sm btn-primary">View Details</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
