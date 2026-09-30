@@ -37,3 +37,14 @@ build/
 
 ### Mac OS ###
 .DS_Store
+# IntelliJ IDEA
+.idea/
+
+# Angular generated files
+**/node_modules/
+**/dist/
+
+# Local environment secrets
+.env
+.env.*
+!.env.example
