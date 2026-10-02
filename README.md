@@ -1,8 +1,8 @@
 # 🛒 E-Commerce Microservices Architecture with Spring Cloud
 
 **Activité Pratique N°2 — Architecture Micro-services avec Spring Cloud**  
-**Encadrant :** Mohamed YOUSSFI  
-**Date du TP :** 21 septembre
+**Etudiante :** Imane Mekaoui 
+**Master Sdia
 
 ---
 
@@ -352,11 +352,6 @@ Les URL exactes des endpoints REST dépendent des contrôleurs définis dans cha
 
 Ces ressources servent de support pédagogique pour la réalisation du travail pratique.
 
-## 👩‍💻 12. Auteur et contexte académique
-
-**Projet :** Activité Pratique N°2 — Architecture Micro-services avec Spring Cloud  
-**Encadrant :** Mohamed YOUSSFI  
-**Dépôt GitHub :** [ImaneMekkaoui1/architecture-microservices-spring-cloud](https://github.com/ImaneMekkaoui1/architecture-microservices-spring-cloud)
 
 ---
 
