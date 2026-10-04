@@ -1,4 +1,4 @@
-# 🛒 E-Commerce Microservices Architecture with Spring Cloud
+# E-Commerce Microservices Architecture with Spring Cloud
 
 **Activité Pratique N°2 — Architecture Microservices avec Spring Cloud**
 
@@ -12,7 +12,7 @@
 
 ---
 
-## 📋 Sommaire
+## Sommaire
 
 - [1. Présentation du projet](#-1-présentation-du-projet)
 - [2. Objectifs pédagogiques](#-2-objectifs-pédagogiques)
