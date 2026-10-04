@@ -1,182 +1,226 @@
 # 🛒 E-Commerce Microservices Architecture with Spring Cloud
 
-**Activité Pratique N°2 — Architecture Micro-services avec Spring Cloud**  
-**Etudiante :** Imane Mekaoui 
-**Master Sdia
+**Activité Pratique N°2 — Architecture Microservices avec Spring Cloud**
+
+| Information | Détail |
+|---|---|
+| Étudiante | Imane Mekkaoui |
+| Formation | Master SDIA |
+| Backend | Java, Spring Boot, Spring Cloud |
+| Frontend | Angular 19 |
+| Architecture | Microservices distribués |
 
 ---
 
-## 📌 1. Présentation du projet
+## 📋 Sommaire
 
-Ce projet consiste à concevoir et développer une application e-commerce basée sur une **architecture microservices** avec Spring Boot et Spring Cloud.
+- [1. Présentation du projet](#-1-présentation-du-projet)
+- [2. Objectifs pédagogiques](#-2-objectifs-pédagogiques)
+- [3. Architecture du système](#-3-architecture-du-système)
+- [4. Description des composants](#-4-description-des-composants)
+- [5. Technologies utilisées](#-5-technologies-utilisées)
+- [6. Structure du projet](#-6-structure-du-projet)
+- [7. Prérequis](#-7-prérequis)
+- [8. Installation et démarrage](#-8-installation-et-démarrage)
+- [9. Tests et validation](#-9-tests-et-validation)
+- [10. Captures d'écran](#-10-captures-décran)
+- [11. Configuration et bonnes pratiques](#-11-configuration-et-bonnes-pratiques)
+- [12. Ressources pédagogiques](#-12-ressources-pédagogiques)
 
-L'application permet de gérer les clients, les produits et les factures. Chaque fonctionnalité métier est organisée dans un service indépendant, tandis que Spring Cloud fournit les mécanismes de communication, de découverte des services, de routage et de centralisation de la configuration.
+---
 
-Une application cliente développée avec Angular permet d'accéder aux fonctionnalités de la plateforme.
+## 1. Présentation du projet
 
-## 🎯 2. Objectifs pédagogiques
+Ce projet consiste à concevoir et à développer une application e-commerce reposant sur une **architecture microservices** avec Spring Boot et Spring Cloud.
 
-Les principaux objectifs de ce travail pratique sont :
+L'application permet de gérer les clients, les produits et les factures. Chaque domaine métier est isolé dans un service indépendant, tandis que les composants Spring Cloud assurent la découverte des services, le routage des requêtes et la centralisation de la configuration.
 
-- Comprendre les principes fondamentaux d'une architecture microservices.
-- Développer des services REST indépendants avec Spring Boot.
-- Mettre en place une API Gateway avec Spring Cloud Gateway.
-- Configurer le routage statique et dynamique des requêtes.
-- Découvrir et enregistrer les services avec Eureka Discovery Service.
-- Mettre en œuvre la communication interservices avec OpenFeign.
+Un client web développé avec Angular permet d'interagir avec les API de l'application.
+
+Le projet met en pratique les principaux mécanismes d'un système distribué : communication REST, API Gateway, découverte de services, configuration centralisée et communication interservices avec OpenFeign.
+
+## 2. Objectifs pédagogiques
+
+Les objectifs de cette activité pratique sont les suivants :
+
+- Concevoir une architecture basée sur des microservices indépendants.
+- Développer des API REST avec Spring Boot.
+- Créer une passerelle avec Spring Cloud Gateway.
+- Configurer le routage des requêtes HTTP.
+- Enregistrer et découvrir les services avec Eureka.
+- Communiquer entre microservices à l'aide d'OpenFeign.
 - Centraliser la configuration avec Spring Cloud Config Server.
-- Développer une interface utilisateur avec Angular.
-- Comprendre l'organisation et l'intégration des composants d'un système distribué.
+- Développer un client web avec Angular.
+- Tester l'intégration des composants et les échanges entre services.
 
-## 🏗️ 3. Architecture du système
+## 3. Architecture du système
 
 L'application est composée de six services Spring Boot et d'un client Angular.
 
-```text
-                     Angular Client
-                            |
-                            v
-                   Spring Cloud Gateway
-                       Port 8888
-                            |
-              +-------------+-------------+
-              |             |             |
-              v             v             v
-       Customer Service  Inventory     Billing
-          Port 8081       Port 8082   Port 8083
-              ^             ^             |
-              |             |             |
-              +-------------+-------------+
-                      OpenFeign
+```mermaid
+flowchart TD
+    A["Client Angular<br/>Port 4200"] --> G["Spring Cloud Gateway<br/>Port 8888"]
 
-              +-----------------------+
-              |                       |
-              v                       v
-       Eureka Discovery       Config Server
-          Port 8761              Port 9999
+    G --> C["Customer Service<br/>Port 8081"]
+    G --> I["Inventory Service<br/>Port 8082"]
+
+    B["Billing Service<br/>Port 8083"] -->|OpenFeign| C
+    B -->|OpenFeign| I
+
+    C -. "Enregistrement et découverte" .-> E["Eureka Discovery<br/>Port 8761"]
+    I -. "Enregistrement et découverte" .-> E
+    B -. "Enregistrement et découverte" .-> E
+    G -. "Enregistrement et découverte" .-> E
+
+    CF["Config Server<br/>Port 9999"] -. "Configuration externe" .-> C
 ```
 
-**Description du fonctionnement :**
+### Fonctionnement général
 
-1. L'utilisateur interagit avec l'application Angular.
-2. Les requêtes HTTP sont envoyées à Spring Cloud Gateway.
-3. La Gateway redirige les requêtes vers le microservice approprié.
-4. Eureka permet aux services de se découvrir et de s'enregistrer.
-5. Billing Service utilise OpenFeign pour communiquer avec les services métier nécessaires à la facturation.
-6. Config Server centralise les propriétés de configuration des services qui lui sont connectés.
+1. L'utilisateur accède à l'application Angular.
+2. Le frontend envoie les requêtes HTTP vers la Gateway.
+3. La Gateway route les requêtes vers les services concernés.
+4. Eureka assure l'enregistrement et la découverte des services.
+5. Billing Service utilise OpenFeign pour récupérer les informations des clients et des produits nécessaires à une facture.
+6. Config Server fournit les propriétés externalisées aux services configurés pour l'utiliser.
 
-*Remarque : les ports indiqués correspondent à la configuration du projet. Les routes et la communication interservices doivent être vérifiées lors des tests.*
+> **Remarque :** les routes explicites de la Gateway utilisent les noms des services avec le préfixe `lb://`. La découverte automatique de routes à partir d'Eureka est une fonctionnalité distincte et doit être activée et vérifiée séparément si elle est exigée.
 
-## ⚙️ 4. Description des microservices
+## 4. Description des composants
 
 ### 4.1 Customer Service
 
-**Port :** `8081`
+**Port : `8081`**
 
-Ce microservice est responsable de la gestion des clients.
+Ce service est responsable de la gestion des clients.
 
-Fonctionnalités principales :
-- Créer un client.
+Fonctionnalités :
 - Consulter la liste des clients.
-- Consulter les informations d'un client.
-- Modifier les informations d'un client.
-- Supprimer un client.
+- Consulter un client par son identifiant.
+- Exposer les données clients aux autres services.
+
+Endpoints testés :
+
+| Méthode | Endpoint | Résultat |
+|---|---|---|
+| GET | `/customers` | Liste des clients |
+| GET | `/customers/{id}` | Détails d'un client |
 
 ### 4.2 Inventory Service
 
-**Port :** `8082`
+**Port : `8082`**
 
 Ce service gère le catalogue des produits.
 
-Fonctionnalités principales :
-- Ajouter un produit.
-- Afficher la liste des produits.
+Fonctionnalités :
+- Consulter la liste des produits.
 - Consulter un produit par son identifiant.
-- Modifier les informations d'un produit.
-- Supprimer un produit.
+- Fournir les informations produits au service de facturation.
+
+Endpoints testés :
+
+| Méthode | Endpoint | Résultat |
+|---|---|---|
+| GET | `/products` | Liste des produits |
+| GET | `/products/{id}` | Détails d'un produit |
 
 ### 4.3 Billing Service
 
-**Port :** `8083`
+**Port : `8083`**
 
-Ce microservice est consacré à la gestion des factures.
+Ce service gère les factures et leur contenu.
 
-Son rôle est notamment de :
-- Gérer les factures.
+Responsabilités :
+- Consulter les factures.
 - Associer une facture à un client.
-- Associer les produits concernés à une facture.
-- Récupérer les données des autres services à l'aide d'OpenFeign.
+- Associer les produits et les quantités à une facture.
+- Récupérer les données externes via OpenFeign.
+- Retourner une facture enrichie avec les informations du client et des produits.
+
+Endpoints testés :
+
+| Méthode | Endpoint | Description |
+|---|---|---|
+| GET | `/bills` | Liste des factures |
+| GET | `/bills/{id}` | Détails d'une facture enrichie |
+| POST | `/bills/full` | Création d'une facture complète |
 
 ### 4.4 Discovery Service — Eureka
 
-**Port :** `8761`
+**Port : `8761`**
 
-Eureka fournit un annuaire centralisé des microservices.
+Eureka fournit un annuaire des microservices.
 
 Il permet :
-- L'enregistrement des services.
-- La découverte des services disponibles.
-- L'identification des services par leur nom.
-- La prise en charge du routage vers les instances enregistrées lorsque la configuration le permet.
+- L'enregistrement des instances.
+- La découverte des services par leur nom.
+- La disponibilité des informations sur les instances enregistrées.
 
-Interface de supervision : `http://localhost:8761`
+Interface :
+
+`http://localhost:8761`
 
 ### 4.5 Gateway Service — Spring Cloud Gateway
 
-**Port :** `8888`
+**Port : `8888`**
 
-La Gateway constitue le point d'entrée HTTP de l'application.
+La Gateway constitue le point d'entrée HTTP pour les routes configurées.
 
-Ses responsabilités sont :
-- Recevoir les requêtes du client Angular.
-- Router les requêtes vers les microservices.
-- Utiliser des routes configurées statiquement ou dynamiquement.
-- Exploiter la découverte des services pour le routage basé sur leur nom lorsque cette fonctionnalité est configurée.
+Routes configurées :
 
-Exemples de chemins prévus dans la configuration :
-- `/customers/**` : Customer Service.
-- `/products/**` : Inventory Service.
+| Route | Destination |
+|---|---|
+| `/customers/**` | `lb://CUSTOMER-SERVICE` |
+| `/products/**` | `lb://INVENTORY-SERVICE` |
+
+Le préfixe `lb://` permet à la Gateway de résoudre la destination via le mécanisme de découverte et de répartition de charge configuré dans Spring Cloud.
 
 ### 4.6 Config Service — Spring Cloud Config Server
 
-**Port :** `9999`
+**Port : `9999`**
 
-Ce service permet de centraliser la configuration externe des microservices.
+Ce service centralise les propriétés externalisées dans un dépôt Git.
 
-Il peut fournir des propriétés comme :
-- Les ports des services.
-- Les URL des services.
-- Les paramètres de découverte Eureka.
-- Les paramètres propres à chaque environnement.
+Il permet de partager des paramètres communs et spécifiques à chaque application, par exemple :
 
-Le dépôt Git configuré dans `config-service` doit contenir les fichiers de configuration attendus par les services clients.
+```properties
+global.params.p1=100
+global.params.p2=200
+customer.params.x=10
+customer.params.y=20
+```
+
+Les services clients doivent être configurés pour importer les propriétés depuis Config Server.
 
 ### 4.7 Client Angular
 
 **Dossier :** `ecom-client-ang`
 
-Le frontend Angular fournit une interface graphique permettant d'interagir avec l'application.
+Le frontend Angular fournit l'interface utilisateur.
 
-Les fonctionnalités prévues comprennent :
-- L'affichage et la gestion des clients.
-- L'affichage et la gestion des produits.
-- La consultation des factures.
-- La communication avec les API backend.
+Éléments principaux :
+- Navigation entre les pages Customers et Products.
+- Services Angular dédiés aux appels HTTP.
+- Communication avec la Gateway sur le port `8888`.
+- Utilisation de Bootstrap pour la présentation.
 
-## 🧰 5. Technologies utilisées
+## 5. Technologies utilisées
 
 | Technologie | Rôle |
 |---|---|
-| Java | Langage de programmation backend |
-| Spring Boot | Développement des microservices |
-| Spring Cloud Gateway | Routage des requêtes HTTP |
+| Java | Langage backend |
+| Spring Boot | Développement des services |
+| Spring Cloud Gateway | Routage HTTP |
 | Spring Cloud Netflix Eureka | Découverte des services |
 | Spring Cloud Config | Configuration centralisée |
-| OpenFeign | Communication entre microservices |
-| REST API | Échange de données via HTTP |
-| Angular | Développement du frontend |
-| Maven | Gestion des dépendances et compilation |
-| Git et GitHub | Gestion de versions et hébergement du code |
+| OpenFeign | Appels REST interservices |
+| Resilience4j | Gestion de la résilience des appels configurés |
+| REST / HTTP | Communication entre composants |
+| Angular 19 | Interface web |
+| Bootstrap 5 | Mise en forme de l'interface |
+| Maven | Construction et gestion des dépendances backend |
+| npm | Gestion des dépendances frontend |
+| Git et GitHub | Gestion de versions |
 
 ## 📁 6. Structure du projet
 
@@ -185,44 +229,40 @@ architecture-microservices-spring-cloud/
 │
 ├── customer-service/
 │   └── src/
-│
 ├── inventory-service/
 │   └── src/
-│
 ├── billing-service/
 │   └── src/
-│
 ├── gateway-service/
 │   └── src/
-│
 ├── discovery-service/
 │   └── src/
-│
 ├── config-service/
 │   └── src/
-│
 ├── ecom-client-ang/
 │   ├── src/
+│   ├── angular.json
 │   ├── package.json
 │   └── package-lock.json
-│
-├── src/
+├── customer-service.properties
 ├── pom.xml
 ├── .gitignore
+├── docs/
+│   └── screenshots/
 └── README.md
 ```
 
-Le fichier `pom.xml` situé à la racine permet de gérer le projet Maven parent et ses modules, selon la configuration définie dans le projet.
+Cette arborescence présente les principaux composants du dépôt. Les fichiers et sous-dossiers exacts peuvent varier selon l'organisation du code.
 
-## 💻 7. Prérequis
+## 7. Prérequis
 
-Avant de démarrer le projet, installer les outils suivants :
+Avant de démarrer le projet, installer :
 
-- JDK 21.
-- Maven, ou le Maven Wrapper fourni avec le projet.
-- Node.js et npm pour Angular.
+- JDK compatible avec la configuration Maven du projet.
+- Maven, ou le Maven Wrapper si disponible.
+- Node.js et npm.
 - Git.
-- Un IDE compatible avec Java, par exemple IntelliJ IDEA ou Visual Studio Code.
+- Un IDE comme IntelliJ IDEA ou Visual Studio Code.
 
 Vérifier les installations :
 
@@ -234,7 +274,7 @@ npm -v
 git --version
 ```
 
-## 🚀 8. Installation et démarrage
+## 8. Installation et démarrage
 
 ### 8.1 Cloner le dépôt
 
@@ -245,49 +285,39 @@ cd architecture-microservices-spring-cloud
 
 ### 8.2 Compiler le backend
 
-À la racine du projet :
+Depuis la racine du projet :
 
 ```bash
 mvn clean package -DskipTests
 ```
 
-Cette commande compile les modules et génère les artefacts de construction sans exécuter les tests.
+Cette commande compile le projet sans exécuter les tests automatisés.
 
 ### 8.3 Démarrer les services backend
 
-Lancer chaque service dans un terminal séparé, après avoir vérifié sa configuration et ses dépendances.
+Lancer chaque service dans un terminal distinct. L'ordre recommandé, à adapter aux dépendances de configuration, est :
 
-Exemple pour Eureka :
+1. Config Service — `9999`
+2. Discovery Service — `8761`
+3. Customer Service — `8081`
+4. Inventory Service — `8082`
+5. Billing Service — `8083`
+6. Gateway Service — `8888`
+
+Exemple de démarrage d'Eureka :
 
 ```bash
 cd discovery-service
 mvn spring-boot:run
 ```
 
-Répéter la procédure pour les services suivants :
+Pour les autres services, utiliser la même commande depuis le dossier correspondant.
 
-| Service | Port |
-|---|---:|
-| Config Service | 9999 |
-| Discovery Service | 8761 |
-| Customer Service | 8081 |
-| Inventory Service | 8082 |
-| Billing Service | 8083 |
-| Gateway Service | 8888 |
-
-**Ordre de démarrage recommandé :**
-
-1. Config Service, si les autres services dépendent de sa configuration.
-2. Discovery Service.
-3. Customer Service et Inventory Service.
-4. Billing Service.
-5. Gateway Service.
-
-Adapter cet ordre aux dépendances réelles du projet. Si Config Server est configuré comme facultatif, certains services peuvent démarrer sans lui.
+Vérifier que les services démarrent sans erreur et apparaissent dans le tableau de bord Eureka.
 
 ### 8.4 Démarrer le frontend Angular
 
-Ouvrir un terminal :
+Dans un nouveau terminal :
 
 ```bash
 cd ecom-client-ang
@@ -295,64 +325,185 @@ npm install
 npm start
 ```
 
-Si la commande `npm start` n'est pas définie dans `package.json`, utiliser :
-
-```bash
-npx ng serve
-```
-
-Accéder ensuite à l'application via :
+Ouvrir ensuite :
 
 `http://localhost:4200`
 
-## 🌐 9. Points d'accès et tests
+Les six services backend doivent être démarrés pour tester l'ensemble de l'application.
 
-| Composant | Adresse |
-|---|---|
-| Angular | `http://localhost:4200` |
-| Eureka Dashboard | `http://localhost:8761` |
-| Gateway | `http://localhost:8888` |
-| Customer Service direct | `http://localhost:8081` |
-| Inventory Service direct | `http://localhost:8082` |
-| Billing Service direct | `http://localhost:8083` |
-| Config Server | `http://localhost:9999` |
+## 9. Tests et validation
 
-Les URL exactes des endpoints REST dépendent des contrôleurs définis dans chaque service.
+Les tests ci-dessous correspondent aux vérifications effectuées pendant le développement.
 
-### Vérifications recommandées
+### 9.1 Vérifier Eureka
 
-- Vérifier que tous les services démarrent sans erreur.
-- Vérifier que les services concernés apparaissent dans le tableau de bord Eureka.
-- Tester les opérations CRUD des clients et des produits.
-- Tester les routes de la Gateway.
-- Vérifier les appels OpenFeign depuis Billing Service.
-- Vérifier que Config Server retourne les propriétés attendues.
-- Tester l'interface Angular et ses appels HTTP.
+Ouvrir :
 
-## 🔒 10. Configuration et bonnes pratiques
+`http://localhost:8761`
 
-- Ne pas publier de mots de passe, clés API ou autres secrets dans Git.
-- Utiliser des fichiers de configuration adaptés à chaque environnement.
-- Vérifier les ports pour éviter les conflits.
-- Maintenir les responsabilités métier séparées entre les microservices.
-- Documenter les endpoints et les erreurs rencontrées.
-- Effectuer les tests des services indépendamment avant de tester l'ensemble de l'application.
+Les services suivants ont été observés avec le statut `UP` :
 
-## 📚 11. Ressources pédagogiques
+- `BILLING-SERVICE`
+- `CONFIG-SERVICE`
+- `CUSTOMER-SERVICE`
+- `GATEWAY-SERVICE`
+- `INVENTORY-SERVICE`
+
+### 9.2 Tester les clients
+
+```bash
+curl -i http://localhost:8081/customers
+```
+
+Résultat observé : réponse HTTP `200 OK` avec une liste de trois clients.
+
+### 9.3 Tester les produits
+
+```bash
+curl -i http://localhost:8082/products
+```
+
+Résultat observé : réponse HTTP `200 OK` avec quatre produits.
+
+### 9.4 Tester les routes de la Gateway
+
+```bash
+curl -i http://localhost:8888/customers
+curl -i http://localhost:8888/products
+```
+
+Résultat observé : les deux routes retournent les données des services correspondants.
+
+### 9.5 Tester la configuration centralisée
+
+```bash
+curl -i http://localhost:8081/testConfig1
+curl -i http://localhost:8081/testConfig2
+```
+
+Résultats observés :
+
+- `/testConfig1` retourne les paramètres `p1=100` et `p2=200`.
+- `/testConfig2` retourne les paramètres `x=10` et `y=20`.
+
+### 9.6 Tester Billing Service et OpenFeign
+
+Liste des factures :
+
+```bash
+curl -i http://localhost:8083/bills
+```
+
+Détails d'une facture :
+
+```bash
+curl -i http://localhost:8083/bills/1
+```
+
+Résultat observé : réponse HTTP `200 OK`. La facture `1` contient les informations du client Mohamed et les détails des produits Computer, Printer et Smartphone.
+
+Ce test confirme que Billing Service récupère les informations du client et des produits via ses clients OpenFeign lorsque les services concernés sont disponibles.
+
+### 9.7 Tester Angular
+
+Ouvrir `http://localhost:4200`, puis vérifier :
+
+- L'affichage de l'application.
+- La navigation vers Customers.
+- La navigation vers Products.
+- Le chargement des données depuis le backend.
+
+Les opérations de création, modification et suppression doivent être testées séparément avant d'être déclarées validées.
+
+## 10. Captures d'écran
+
+### 10.1 Tableau de bord Eureka
+
+*Objectif : démontrer l'enregistrement des cinq services backend.*
+
+<img width="1412" height="420" alt="image" src="https://github.com/user-attachments/assets/328d268a-30aa-4845-a29f-48be938a9465" />
+
+
+### 10.2 Liste des clients — Customer Service
+
+*Objectif : illustrer le résultat de l'appel `GET /customers`.*
+
+<img width="574" height="879" alt="image" src="https://github.com/user-attachments/assets/ca93f15a-73b8-4117-8d49-056bf80ec1ca" />
+
+
+### 10.3 Liste des produits — Inventory Service
+
+*Objectif : illustrer le résultat de l'appel `GET /products`.*
+
+<img width="560" height="838" alt="image" src="https://github.com/user-attachments/assets/3c80ee9e-c394-4c49-906a-873d679ea3ff" />
+
+
+### 10.4 Routage via Spring Cloud Gateway
+
+*Objectif : montrer les réponses obtenues via le port `8888`.*
+
+<img width="660" height="826" alt="image" src="https://github.com/user-attachments/assets/671bb54c-043d-4ad5-ac77-a818493951e4" />
+
+
+### 10.5 Configuration centralisée
+
+*Objectif : illustrer les paramètres récupérés depuis Config Server.*
+
+<img width="395" height="212" alt="image" src="https://github.com/user-attachments/assets/727f5540-15ff-4cfe-a975-f32108bd50ec" />
+
+
+### 10.6 Facture enrichie — Billing Service et OpenFeign
+
+*Objectif : montrer une facture contenant les informations du client et des produits.*
+
+<img width="1253" height="651" alt="image" src="https://github.com/user-attachments/assets/34f7e308-6eba-40e6-9c93-7f0b1c61d391" />
+
+
+### 10.7 Interface Angular — Customers
+
+*Objectif : présenter l'affichage des clients dans le frontend.*
+<img width="1234" height="540" alt="image" src="https://github.com/user-attachments/assets/4d24eae8-c8ac-44f5-a4b4-b71a3c81b6a6" />
+
+
+### 10.8 Interface Angular — Products
+
+*Objectif : présenter l'affichage des produits dans le frontend.*
+
+<img width="1225" height="492" alt="image" src="https://github.com/user-attachments/assets/859b8367-cded-4e55-b5ed-c088a21335b8" />
+
+
+
+## 11. Configuration et bonnes pratiques
+
+- Ne pas versionner de mots de passe, clés API ou autres secrets.
+- Vérifier les ports et les URL de chaque service.
+- Garder les responsabilités métier séparées entre les microservices.
+- Centraliser les paramètres communs lorsque cela est pertinent.
+- Vérifier les statuts Eureka avant de tester les communications interservices.
+- Tester les API indépendamment avant les tests d'intégration.
+- Documenter les erreurs et les corrections apportées.
+- Conserver les captures d'écran des tests comme preuves de validation.
+
+## 12. Ressources pédagogiques
 
 ### Architecture microservices avec Spring Cloud
 
-- [Partie 1 — Vidéo YouTube](https://www.youtube.com/watch?v=kOVHzN8I8e8)
-- [Partie 2 — Vidéo YouTube](https://www.youtube.com/watch?v=-iM3J_mgqlM)
+- [Partie 1 — Architecture microservices](https://www.youtube.com/watch?v=kOVHzN8I8e8)
+- [Partie 2 — Architecture microservices](https://www.youtube.com/watch?v=-iM3J_mgqlM)
 
 ### Spring Cloud Config Server
 
-- [Vidéo sur la configuration centralisée](https://www.youtube.com/watch?v=-G2rcLMO1gQ)
-- [Dépôt de référence de Mohamed Youssfi](https://github.com/mohamedYoussfi/micro-services-app)
-
-Ces ressources servent de support pédagogique pour la réalisation du travail pratique.
+- [Vidéo — Spring Cloud Config](https://www.youtube.com/watch?v=-G2rcLMO1gQ)
 
 
 ---
 
-*Ce projet est réalisé dans un cadre pédagogique afin de mettre en pratique les concepts d'architecture microservices, de découverte et de communication entre services, de routage et de configuration centralisée avec Spring Cloud.*
+Conclusion
+
+Cette activité pratique met en œuvre une architecture microservices fondée sur Spring Boot et Spring Cloud. Elle couvre la séparation des services métier, le routage HTTP, la découverte des services, la communication interservices avec OpenFeign, la configuration centralisée et l'intégration d'un client Angular.
+
+Les tests réalisés confirment le démarrage des services, le fonctionnement des routes principales, la récupération de la configuration distante et l'enrichissement d'une facture avec les informations du client et des produits.
+
+Les fonctionnalités supplémentaires, notamment le routage automatique par découverte et les opérations CRUD non encore vérifiées, doivent être validées selon les exigences exactes de l'activité.
+
+*Projet réalisé dans le cadre de l'Activité Pratique N°2 — Architecture Microservices avec Spring Cloud.*
