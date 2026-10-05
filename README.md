@@ -222,7 +222,7 @@ Le frontend Angular fournit l'interface utilisateur.
 | npm | Gestion des dépendances frontend |
 | Git et GitHub | Gestion de versions |
 
-## 📁 6. Structure du projet
+## 6. Structure du projet
 
 ```text
 architecture-microservices-spring-cloud/
@@ -456,7 +456,8 @@ Les opérations de création, modification et suppression doivent être testées
 
 *Objectif : montrer une facture contenant les informations du client et des produits.*
 
-<img width="1253" height="651" alt="image" src="https://github.com/user-attachments/assets/34f7e308-6eba-40e6-9c93-7f0b1c61d391" />
+<img width="1232" height="600" alt="image" src="https://github.com/user-attachments/assets/369d9574-f7df-4a3b-ba99-0c1f4127f23f" />
+
 
 
 ### 10.7 Interface Angular — Customers
